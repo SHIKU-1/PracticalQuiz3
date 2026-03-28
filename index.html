@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar System Project</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@200;400&display=swap" rel="stylesheet" />
+  <script src="script/aframe.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#000; overflow:hidden; }
+
+    #intro {
+      position:fixed; inset:0; z-index:100;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:20px;
+      background: radial-gradient(ellipse at center, #0a0a2e 0%, #000 70%);
+    }
+
+    .stars {
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+        radial-gradient(1px 1px at 50% 10%, #fff, transparent),
+        radial-gradient(1px 1px at 80% 50%, #fff, transparent),
+        radial-gradient(1px 1px at 10% 70%, #fff, transparent),
+        radial-gradient(1px 1px at 60% 80%, #fff, transparent),
+        radial-gradient(1px 1px at 35% 55%, #fff, transparent),
+        radial-gradient(1px 1px at 75% 20%, #fff, transparent),
+        radial-gradient(1px 1px at 90% 75%, #fff, transparent),
+        radial-gradient(1px 1px at 45% 40%, #fff, transparent),
+        radial-gradient(2px 2px at 15% 45%, #ffd, transparent),
+        radial-gradient(2px 2px at 70% 60%, #ddf, transparent),
+        radial-gradient(1px 1px at 55% 25%, #fff, transparent),
+        radial-gradient(1px 1px at 25% 85%, #fff, transparent),
+        radial-gradient(1px 1px at 85% 35%, #fff, transparent),
+        radial-gradient(1px 1px at 40% 90%, #fff, transparent);
+      animation: slow-rotate 60s linear infinite;
+    }
+    @keyframes slow-rotate { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+    .sun-orb {
+      width:90px; height:90px; border-radius:50%;
+      background: radial-gradient(circle, #fff5a0 0%, #ff9500 45%, #cc4400 80%, transparent 100%);
+      box-shadow: 0 0 40px #ff9500, 0 0 80px rgba(255,149,0,0.4);
+      animation: breathe 4s ease-in-out infinite;
+      position:relative; z-index:2;
+    }
+    @keyframes breathe {
+      0%,100% { box-shadow:0 0 40px #ff9500, 0 0 80px rgba(255,149,0,0.4); transform:scale(1); }
+      50% { box-shadow:0 0 60px #ff9500, 0 0 120px rgba(255,149,0,0.5); transform:scale(1.05); }
+    }
+
+    h1 {
+      font-family:'Cinzel', serif;
+      font-size:clamp(32px, 6vw, 64px);
+      color:#fff;
+      letter-spacing:8px;
+      text-align:center;
+      text-shadow: 0 0 30px rgba(255,180,50,0.5);
+      animation: fade-in 1s ease forwards;
+      opacity:0; animation-delay:0.3s;
+    }
+
+    .byline {
+      font-family:'Raleway', sans-serif;
+      font-weight:200; font-size:13px;
+      letter-spacing:4px; color:rgba(255,255,255,0.35);
+      text-transform:uppercase;
+      opacity:0; animation:fade-in 1s ease forwards 0.6s;
+    }
+
+    p {
+      font-family:'Raleway', sans-serif;
+      font-weight:200; font-size:14px;
+      letter-spacing:6px; color:rgba(255,255,255,0.4);
+      text-transform:uppercase;
+      opacity:0; animation:fade-in 1s ease forwards 0.9s;
+    }
+
+    .divider {
+      width:60px; height:1px;
+      background:rgba(255,180,50,0.5);
+      opacity:0; animation:fade-in 1s ease forwards 1s;
+    }
+
+    button {
+      margin-top:10px;
+      padding:12px 40px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.3);
+      color:#fff;
+      font-family:'Raleway', sans-serif;
+      font-size:12px; letter-spacing:4px;
+      text-transform:uppercase; cursor:pointer;
+      opacity:0; animation:fade-in 1s ease forwards 1.3s;
+      transition:all 0.3s;
+    }
+    button:hover {
+      background:rgba(255,255,255,0.08);
+      border-color:rgba(255,180,50,0.6);
+      color:#ffd580;
+    }
+
+    @keyframes fade-in { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+    #intro.hide { animation:fade-out 1s ease forwards; }
+    @keyframes fade-out { to{opacity:0; pointer-events:none;} }
+
+    /* WASD hint */
+    #controls-hint {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      z-index:50;
+      font-family:'Raleway', sans-serif;
+      font-size:11px; letter-spacing:3px;
+      color:rgba(255,255,255,0.3);
+      text-align:center;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity 1s ease 1.5s;
+    }
+    #controls-hint.visible { opacity:1; }
+    #controls-hint span {
+      display:inline-block;
+      border:1px solid rgba(255,255,255,0.2);
+      padding:2px 7px; margin:0 2px;
+      border-radius:3px;
+    }
+
+    a-scene { opacity:0; transition:opacity 1.2s ease; }
+    a-scene.visible { opacity:1; }
+  </style>
+</head>
+<body>
+
+  <div id="intro">
+    <div class="stars"></div>
+    <div class="sun-orb"></div>
+    <h1>SOLAR SYSTEM</h1>
+    <div class="divider"></div>
+    <div class="byline">Designed by Shikuran Adam</div>
+    <p>| Beyond | The | Horizon |</p>
+    <button type="button" onclick="enter()">Enter to view</button>
+  </div>
+
+  <a-scene id="scene" background="color:#000005" renderer="antialias:true;colorManagement:true;" vr-mode-ui="enabled:false">
+    <a-assets timeout="15000">
+      <img id="tex-stars"       src="texture/2k_stars_milky_way.jpg" />
+      <img id="tex-sun"         src="texture/2k_sun.jpg" />
+      <img id="tex-mercury"     src="texture/2k_mercury.jpg" />
+      <img id="tex-venus"       src="texture/2k_venus_atmosphere.jpg" />
+      <img id="tex-earth"       src="texture/2k_earth_daymap.jpg" />
+      <img id="tex-moon"        src="texture/2k_moon.jpg" />
+      <img id="tex-mars"        src="texture/2k_mars.jpg" />
+      <img id="tex-jupiter"     src="texture/2k_jupiter.jpg" />
+      <img id="tex-saturn"      src="texture/2k_saturn.jpg" />
+      <img id="tex-saturn-ring" src="texture/2k_saturn_ring_alpha.png" />
+      <img id="tex-uranus"      src="texture/2k_uranus.jpg" />
+      <img id="tex-neptune"     src="texture/2k_neptune.jpg" />
+    </a-assets>
+
+    <a-sky src="#tex-stars" radius="800"></a-sky>
+
+    <!-- Camera with both look-controls AND wasd-controls for free flight -->
+    <a-entity
+      id="rig"
+      position="0 30 90"
+      rotation="-18 0 0"
+      wasd-controls="acceleration:30; fly:true"
+      look-controls="pointerLockEnabled:false">
+      <a-camera></a-camera>
+    </a-entity>
+
+    <a-sphere radius="6" src="#tex-sun" emissive="#ff6600" emissive-intensity="0.5" position="0 0 0"
+      animation="property:rotation;to:0 360 0;loop:true;dur:25000;easing:linear">
+      <a-sphere radius="7" color="#ff8800" opacity="0.06" shader="flat" side="back"></a-sphere>
+    </a-sphere>
+    <a-light type="point" intensity="2.5" color="#fff5e0" position="0 0 0" distance="500" decay="1"></a-light>
+    <a-light type="ambient" intensity="0.12"></a-light>
+
+    <a-torus radius="11" radius-tubular="0.03" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="16" radius-tubular="0.03" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="22" radius-tubular="0.03" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="29" radius-tubular="0.03" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="39" radius-tubular="0.04" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="51" radius-tubular="0.04" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="62" radius-tubular="0.04" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+    <a-torus radius="72" radius-tubular="0.04" color="#fff" opacity="0.1" material="transparent:true" rotation="90 0 0"></a-torus>
+
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:8800;easing:linear">
+      <a-sphere radius="0.55" src="#tex-mercury" position="11 0 0" animation="property:rotation;to:0 360 0;loop:true;dur:5000;easing:linear"></a-sphere>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:22500;easing:linear">
+      <a-sphere radius="1.1" src="#tex-venus" position="16 0 0" animation="property:rotation;to:0 360 0;loop:true;dur:12000;easing:linear"></a-sphere>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:36500;easing:linear">
+      <a-entity position="22 0 0">
+        <a-sphere radius="1.2" src="#tex-earth" animation="property:rotation;to:0 360 0;loop:true;dur:10000;easing:linear"></a-sphere>
+        <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:27000;easing:linear">
+          <a-sphere radius="0.32" src="#tex-moon" position="2.5 0.4 0"></a-sphere>
+        </a-entity>
+      </a-entity>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:68700;easing:linear">
+      <a-sphere radius="0.75" src="#tex-mars" position="29 0 0" animation="property:rotation;to:0 360 0;loop:true;dur:9700;easing:linear"></a-sphere>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:115000;easing:linear">
+      <a-sphere radius="3.2" src="#tex-jupiter" position="39 0 0" animation="property:rotation;to:0 360 0;loop:true;dur:4200;easing:linear"></a-sphere>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:285000;easing:linear">
+      <a-entity position="51 0 0">
+        <a-sphere radius="2.7" src="#tex-saturn" animation="property:rotation;to:0 360 0;loop:true;dur:4600;easing:linear"></a-sphere>
+        <a-cylinder radius="4.8" height="0.06" src="#tex-saturn-ring" transparent="true" opacity="0.9" side="double"></a-cylinder>
+      </a-entity>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:840000;easing:linear">
+      <a-sphere radius="1.9" src="#tex-uranus" position="62 0 0" animation="property:rotation;to:0 360 0;loop:true;dur:6200;easing:linear"></a-sphere>
+    </a-entity>
+    <a-entity animation="property:rotation;to:0 360 0;loop:true;dur:1647000;easing:linear">
+      <a-sphere radius="1.85" src="#tex-neptune" position="72 0 0" animation="property:rotation;to:0 360 0;loop:true;dur:5800;easing:linear"></a-sphere>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    function enter() {
+      document.getElementById('intro').classList.add('hide');
+      document.getElementById('scene').classList.add('visible');
+      setTimeout(() => {
+        document.getElementById('intro').remove();
+        document.getElementById('controls-hint').classList.add('visible');
+        setTimeout(() => {
+          document.getElementById('controls-hint').style.opacity = '0';
+        }, 6000);
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
